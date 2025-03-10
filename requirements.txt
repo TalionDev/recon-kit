@@ -1,0 +1,5 @@
+﻿httpx
+typer
+rich
+python-whois
+shodan
