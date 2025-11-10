@@ -1,1 +1,2 @@
-﻿# recon-kit: estrutura inicial
+﻿
+# recon-kit: documentação finalizada
