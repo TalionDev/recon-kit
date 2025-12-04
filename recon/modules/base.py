@@ -3,6 +3,7 @@ Classe base abstrata para todos os módulos do Recon-Kit.
 Define o contrato que todos os módulos devem seguir.
 """
 from abc import ABC, abstractmethod
+from typing import Optional
 
 
 class BaseModule(ABC):
@@ -27,7 +28,7 @@ class BaseModule(ABC):
         self.fetcher = fetcher or Fetcher.get_instance()
     
     @abstractmethod
-    def run(self, domain: str, ip: str | None) -> dict:
+    def run(self, domain: str, ip: Optional[str]) -> dict:
         """
         Executa a lógica principal do módulo.
         

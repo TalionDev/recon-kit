@@ -1,4 +1,5 @@
 from recon.modules.base import BaseModule
+from typing import Optional
 
 
 class SsllabsModule(BaseModule):
@@ -10,7 +11,7 @@ class SsllabsModule(BaseModule):
     CATEGORY = "https"
     NAME = "ssllabs"
     
-    def run(self, domain: str, ip: str | None) -> dict:
+    def run(self, domain: str, ip: Optional[str]) -> dict:
         url = "https://api.ssllabs.com/api/v3/analyze"
         
         params = {

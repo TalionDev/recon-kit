@@ -1,4 +1,5 @@
 from recon.modules.base import BaseModule
+from typing import Optional
 
 
 class HeadersModule(BaseModule):
@@ -9,7 +10,7 @@ class HeadersModule(BaseModule):
     CATEGORY = "headers"
     NAME = "headers"
     
-    def run(self, domain: str, ip: str | None) -> dict:
+    def run(self, domain: str, ip: Optional[str]) -> dict:
         target = f"https://{domain}"
         
         resp = self.fetcher.head(target)

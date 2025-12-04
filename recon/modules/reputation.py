@@ -1,4 +1,5 @@
 from recon.modules.base import BaseModule
+from typing import Optional
 
 
 class ReputationModule(BaseModule):
@@ -9,7 +10,7 @@ class ReputationModule(BaseModule):
     CATEGORY = "reputation"
     NAME = "reputation"
     
-    def run(self, domain: str, ip: str | None) -> dict:
+    def run(self, domain: str, ip: Optional[str]) -> dict:
         if not ip:
             return self.error_response("NO_IP", "IP address is required")
 

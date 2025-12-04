@@ -1,4 +1,5 @@
 from recon.modules.base import BaseModule
+from typing import Optional
 
 
 class HackertargetModule(BaseModule):
@@ -9,7 +10,7 @@ class HackertargetModule(BaseModule):
     CATEGORY = "passive_recon"
     NAME = "hackertarget"
     
-    def run(self, domain: str, ip: str | None) -> dict:
+    def run(self, domain: str, ip: Optional[str]) -> dict:
         results = {}
 
         # 1. DNS Lookup (A, AAAA, MX, NS, TXT)
