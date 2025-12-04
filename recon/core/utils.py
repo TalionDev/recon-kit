@@ -28,3 +28,21 @@ def resolve_ip(domain: str) -> str:
         return None
     except Exception as e:
         return None
+
+
+def resolve_all_ips(domain: str) -> list:
+    """
+    Resolve todos os IPs (IPv4 e IPv6) do domínio.
+    
+    Args:
+        domain: Domínio a ser resolvido
+    
+    Returns:
+        Lista de IPs únicos (IPv4 e IPv6)
+    """
+    try:
+        results = socket.getaddrinfo(domain, None)
+        ips = list(set(r[4][0] for r in results))
+        return ips
+    except socket.gaierror:
+        return []
