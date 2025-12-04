@@ -21,3 +21,12 @@ COLOR_SUCCESS = "green"
 COLOR_WARNING = "yellow"
 COLOR_ERROR = "red"
 COLOR_INFO = "cyan"
+
+# Configurações de Execução
+MAX_WORKERS = 5
+MAX_SUBDOMAINS = 100
+CACHE_ENABLED = False
+CACHE_TTL = 3600  # segundos
+
+# Configurações de Output
+OUTPUT_DIR = "results"

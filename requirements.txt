@@ -1,5 +1,7 @@
-﻿httpx
+httpx
 typer
 rich
 python-whois
 shodan
+pytest>=7.0.0
+pytest-mock>=3.0.0

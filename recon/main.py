@@ -8,30 +8,30 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 # Imports do Core
 from recon.core.utils import normalize_domain, resolve_ip
 from recon.report.builder import ReportBuilder
+from recon.config import MAX_WORKERS
 
-# Imports dos Módulos (Formato explícito para evitar circular imports)
-import recon.modules.internetdb as internetdb 
-import recon.modules.crtsh as crtsh 
-import recon.modules.hackertarget as hackertarget
-import recon.modules.headers as headers
-import recon.modules.reputation as reputation
-import recon.modules.ssllabs as ssllabs
-import recon.modules.observatory as observatory
+# Imports dos Módulos (Classes)
+from recon.modules.internetdb import InternetdbModule
+from recon.modules.crtsh import CrtshModule
+from recon.modules.hackertarget import HackertargetModule
+from recon.modules.headers import HeadersModule
+from recon.modules.reputation import ReputationModule
+from recon.modules.ssllabs import SsllabsModule
+from recon.modules.observatory import ObservatoryModule
 
 
 console = Console()
 
-def run_module(name, module_func, domain, ip):
+def run_module(module_instance, domain, ip):
     """
     Wrapper para execução segura dos módulos.
-    Chama a função run() dentro de cada módulo.
+    Chama o método run() da instância do módulo.
     """
     try:
-        # Chama a função run dentro do módulo (e.g., crtsh.run)
-        return name, module_func.run(domain, ip)
+        return module_instance.NAME, module_instance.CATEGORY, module_instance.run(domain, ip)
     except Exception as e:
         # Em caso de crash do código do módulo, retorna erro limpo
-        return name, {"error": str(e), "crash": True}
+        return module_instance.NAME, module_instance.CATEGORY, {"error": str(e), "crash": True}
 
 def main():
     # 1. Setup CLI
@@ -54,16 +54,15 @@ def main():
     
     console.print(f"[bold green] IP Resolvido:[/bold green] {ip}\n")
 
-    # 3. Configuração dos Módulos
-    # Lista de tuplas: (Nome Chave no JSON, Módulo Importado)
+    # 3. Configuração dos Módulos (instâncias)
     modules_to_run = [
-        ("internetdb", internetdb),
-        ("crtsh", crtsh),
-        ("hackertarget", hackertarget),
-        ("headers", headers),
-        ("reputation", reputation),
-        ("ssllabs", ssllabs),
-        ("observatory", observatory)
+        InternetdbModule(),
+        CrtshModule(),
+        HackertargetModule(),
+        HeadersModule(),
+        ReputationModule(),
+        SsllabsModule(),
+        ObservatoryModule()
     ]
 
     # Estrutura Final dos Dados
@@ -84,28 +83,30 @@ def main():
     ) as progress:
         task = progress.add_task("[cyan]Escaneando fontes passivas...", total=len(modules_to_run))
         
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             # Submete tarefas
             futures = []
-            for name, module in modules_to_run:
-                # Passamos o objeto do módulo para run_module
-                futures.append(executor.submit(run_module, name, module, domain, ip))
+            for module in modules_to_run:
+                futures.append(executor.submit(run_module, module, domain, ip))
 
             # Coleta resultados
             for future in futures:
-                name, data = future.result()
+                name, category, data = future.result()
                 
-                # Roteamento dos dados para a categoria correta no JSON
-                if name in ["crtsh", "hackertarget"]:
+                # Roteamento automático dos dados baseado na CATEGORY do módulo
+                if category == "passive_recon":
                     final_results["passive_recon"][name] = data
-                elif name == "internetdb":
-                    final_results["reputation"]["shodan_internetdb"] = data
-                elif name == "reputation":
-                    # reputation é o módulo que contém AbuseIPDB e GreyNoise
-                    final_results["reputation"].update(data)
-                elif name == "headers":
+                elif category == "reputation":
+                    if name == "internetdb":
+                        final_results["reputation"]["shodan_internetdb"] = data
+                    elif name == "reputation":
+                        # reputation é o módulo que contém AbuseIPDB e GreyNoise
+                        final_results["reputation"].update(data)
+                    else:
+                        final_results["reputation"][name] = data
+                elif category == "headers":
                     final_results["headers"] = data
-                elif name in ["ssllabs", "observatory"]:
+                elif category == "https":
                     final_results["https"][name] = data
                 
                 progress.advance(task)

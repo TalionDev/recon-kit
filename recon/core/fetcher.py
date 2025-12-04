@@ -10,7 +10,17 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class Fetcher:
     """
     Cliente HTTP centralizado com tratamento de erros, retries e headers consistentes.
+    Implementa padrão Singleton para evitar múltiplas instâncias.
     """
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        """Retorna a instância singleton do Fetcher."""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+    
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update(DEFAULT_HEADERS)
